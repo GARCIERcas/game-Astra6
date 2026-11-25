@@ -1,6 +1,7 @@
 import "./style.css";
 import { Flight } from "./flight";
 import { Scene } from "./render";
+import { drawCover, drawWordmark } from "./cover";
 import { hud } from "./hud";
 const el = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -22,18 +23,9 @@ try {
 }
 const mode = el<HTMLSelectElement>("mode"),
   dialog = el<HTMLDialogElement>("dialog");
-const metrics = [
-  ["◈", "СКОРОСТЬ", "км/ч", 1200],
-  ["⌁", "ВЫСОТА", "м", 3000],
-  ["⤴", "ПЕРЕГРУЗКА", "G", 9],
-  ["▥", "ТЯГА", "%", 100],
-] as const;
-el("metrics").innerHTML = metrics
-  .map(
-    ([icon, title, unit]) =>
-      `<div class="metric"><label><i>${icon}</i>${title}</label><output></output><small>${unit}</small><div class="meter">${Array.from({ length: 12 }, (_, i) => `<b style="height:${4 + i}px"></b>`).join("")}</div></div>`,
-  )
-  .join("");
+const cover = el<HTMLCanvasElement>("cover");
+const mark = el<HTMLCanvasElement>("wordmark");
+drawWordmark(mark);
 let audio: AudioContext | undefined,
   osc: OscillatorNode | undefined,
   gain: GainNode | undefined,
@@ -60,23 +52,18 @@ el("sound").onclick = async () => {
   await audio.resume();
   sound = !sound;
   audioState();
-  el("sound").textContent = sound ? "♫ ●" : "♫";
+  el("sound").textContent = sound ? "Звук вкл." : "Звук выкл.";
+  el("sound").setAttribute("aria-pressed", String(sound));
   el("sound").title = el("sound").ariaLabel = sound
     ? "Выключить звук"
     : "Включить звук";
 };
 function sync() {
   const ended = flight.ended;
-  el("state").textContent =
-    ended || (active ? "В полёте" : flight.time ? "Пауза" : "Готов к вылету");
+  document.body.classList.toggle("flying", active);
   el("status").textContent = ended;
-  el("fly").textContent = ended
-    ? "↻  Новый вылет"
-    : active
-      ? "Ⅱ  Пауза"
-      : flight.time
-        ? "▶  Продолжить"
-        : "▶  Начать полёт";
+  const label = ended ? "Новый вылет" : flight.time ? "Продолжить" : "Вылет";
+  el("fly").firstChild!.textContent = label + " ";
   el("route").textContent = flight.course
     ? "Кольцо " +
       String(Math.min(8, flight.gate + 1)).padStart(2, "0") +
@@ -98,10 +85,13 @@ function toggle() {
   if (flight.ended) reset();
   active = !active;
   keys.clear();
+  dirty = true;
   sync();
+  (active ? el("pause") : el("fly")).focus({ preventScroll: true });
 }
 mode.onchange = reset;
 el("fly").onclick = toggle;
+el("pause").onclick = toggle;
 el("help").onclick = () => {
   if (active) toggle();
   dialog.showModal();
@@ -111,7 +101,12 @@ const keyName = (e: KeyboardEvent) =>
   e.key === "Shift" || e.key === "Control" ? e.key : e.code;
 window.onkeydown = (e) => {
   if (dialog.open || e.target === mode) return;
-  if (e.code === "Space" && e.target instanceof HTMLButtonElement) return;
+  if (
+    e.code === "Space" &&
+    e.target instanceof HTMLButtonElement &&
+    !["fly", "pause"].includes(e.target.id)
+  )
+    return;
   if (
     [
       "Space",
@@ -156,7 +151,9 @@ for (const [k, s] of [
   b.onlostpointercapture = () => keys.delete(k);
   el("touch").append(b);
 }
-new ResizeObserver(() => (dirty = true)).observe(sceneCanvas);
+new ResizeObserver(() => {
+  dirty = true;
+}).observe(sceneCanvas);
 function frame(t: number) {
   const dt = Math.min(0.1, (t - prev) / 1000);
   prev = t;
@@ -174,28 +171,20 @@ function frame(t: number) {
   }
   if (dirty) {
     scene.draw(flight);
-    hud(overlay, flight);
-    const vals = [
-      Math.round(Math.hypot(...flight.vel) * 3.6),
-      Math.round(flight.pos[1]),
-      flight.load.toFixed(1),
-      Math.round(flight.throttle * 100),
-    ];
-    document.querySelectorAll(".metric").forEach((m, i) => {
-      m.querySelector("output")!.textContent = String(vals[i]);
-      m.querySelectorAll("b").forEach(
-        (b, j) =>
-          (b.style.background =
-            j < (Number(vals[i]) / metrics[i][3]) * 12 ? "#d5b376" : "#40473d"),
-      );
-    });
+    if (active) hud(overlay, flight);
+    else drawCover(cover);
+    el("thrust").textContent = Math.round(flight.throttle * 100) + "%";
+    el("load").textContent = flight.load.toFixed(1) + " G";
     el("clock").textContent = [
       Math.floor(flight.time / 60),
       Math.floor(flight.time % 60),
     ]
       .map((n) => String(n).padStart(2, "0"))
       .join(":");
-    sync();
+    if (active)
+      el("route").textContent = flight.course
+        ? "Кольцо " + (flight.gate + 1) + " / 8"
+        : "Свободный полёт";
     if (osc) osc.frequency.value = 30 + flight.throttle * 47;
     dirty = false;
   }
