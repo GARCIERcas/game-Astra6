@@ -17,7 +17,7 @@ let scene: Scene;
 try {
   scene = new Scene(sceneCanvas);
 } catch (e) {
-  el("status").textContent = String(e);
+  el("status").textContent = e instanceof Error ? e.message : String(e);
   (el("fly") as HTMLButtonElement).disabled = true;
   throw e;
 }
@@ -134,16 +134,17 @@ window.onblur = () => {
   keys.clear();
   if (active) toggle();
 };
-for (const [k, s] of [
-  ["KeyA", "↶"],
-  ["KeyW", "↓"],
-  ["KeyS", "↑"],
-  ["KeyD", "↷"],
-  ["Shift", "＋"],
-  ["Control", "−"],
+for (const [k, s, label] of [
+  ["KeyA", "↶", "Крен влево"],
+  ["KeyW", "↓", "Нос вниз"],
+  ["KeyS", "↑", "Нос вверх"],
+  ["KeyD", "↷", "Крен вправо"],
+  ["Shift", "＋", "Увеличить тягу"],
+  ["Control", "−", "Уменьшить тягу"],
 ]) {
   const b = document.createElement("button");
   b.textContent = s;
+  b.setAttribute("aria-label", label);
   b.onpointerdown = (e) => {
     b.setPointerCapture(e.pointerId);
     keys.add(k);

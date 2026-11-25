@@ -68,15 +68,7 @@ export function hud(canvas: HTMLCanvasElement, f: Flight) {
         w - 50,
       ),
       yy = clamp(g.z > 0 ? g.y - Math.abs(g.radius) - 11 : y, 52, h - 53);
-    txt(
-      "◇ " +
-        String(f.gate + 1).padStart(2, "0") +
-        "   " +
-        (g.dist / 1000).toFixed(1) +
-        " KM",
-      xx,
-      yy,
-    );
+    txt("◇ " + (g.dist / 1000).toFixed(1) + " км", xx, yy);
   }
   c.strokeStyle = ink;
   c.fillStyle = ink;
