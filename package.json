@@ -1,0 +1,19 @@
+{
+  "name": "astra-flight",
+  "version": "1.0.0",
+  "description": "Пиксельный авиасимулятор с трёхмерной физикой",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build --base=./",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GARCIERcas/game-Astra6.git"
+  },
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

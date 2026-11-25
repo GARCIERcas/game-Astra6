@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#111514" />
+    <title>ASTRA-6 · Полётная станция</title>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <svg width="36" height="33" viewBox="0 0 40 34" fill="currentColor">
+          <path d="M0 30 19 2h7L9 30zm14 0L27 10l12 20H28l-3-6-4 6z" /></svg
+        >ASTRA<span>–</span>6
+      </div>
+      <div class="headright">
+        <span class="online">● &nbsp; СИСТЕМА ОНЛАЙН</span
+        ><button id="help" title="Управление">⌨ <b>Управление</b></button
+        ><button id="sound" title="Включить звук" aria-label="Включить звук">
+          ♫
+        </button>
+      </div>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <div class="eyebrow"><i></i> АВИАЦИОННЫЙ СИМУЛЯТОР</div>
+          <h1>Полётная станция</h1>
+        </div>
+        <select id="mode" aria-label="Режим полёта">
+          <option>Тренировочный маршрут</option>
+          <option>Свободный полёт</option>
+        </select>
+      </section>
+      <div class="frame">
+        <div class="bar">
+          <strong><em>▣</em> ОБЗОР ИЗ ШЛЕМА</strong
+          ><span>КАМЕРА 01 &nbsp; / &nbsp; HUD</span>
+        </div>
+        <div id="view">
+          <canvas id="scene"></canvas><canvas id="hud"></canvas>
+          <div class="topinfo">ASTRA–6<br />ВИЗОР / 01</div>
+          <div class="timer">MET <span id="clock">00:00</span></div>
+          <div id="status"></div>
+          <div id="touch"></div>
+        </div>
+        <div class="actionbar">
+          <div>
+            <span class="dot"></span><strong id="state">Готов к вылету</strong
+            ><small id="route">Кольцо 01 / 08</small>
+          </div>
+          <button id="fly">▶ &nbsp; Начать полёт</button>
+        </div>
+      </div>
+      <section class="telehead">
+        <h2>Телеметрия</h2>
+        <span>БОРТОВЫЕ ПРИБОРЫ</span>
+      </section>
+      <div id="metrics"></div>
+    </main>
+    <dialog id="dialog">
+      <h2>Управление полётом</h2>
+      <p>
+        Пролетите сквозь восемь колец в долине. Ромб на краю визора указывает на
+        следующее кольцо.
+      </p>
+      <dl>
+        <dt>W / S &nbsp; или &nbsp; ↑ / ↓</dt>
+        <dd>Нос вниз / вверх</dd>
+        <dt>A / D &nbsp; или &nbsp; ← / →</dt>
+        <dd>Крен влево / вправо</dd>
+        <dt>Q / E</dt>
+        <dd>Руль направления</dd>
+        <dt>Shift / Ctrl</dt>
+        <dd>Увеличить / уменьшить тягу</dd>
+        <dt>Пробел</dt>
+        <dd>Старт / пауза</dd>
+      </dl>
+      <button id="close">Закрыть</button>
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
